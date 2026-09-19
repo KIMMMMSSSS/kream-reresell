@@ -7,12 +7,11 @@ if not exist .venv\Scripts\python.exe (
   exit /b 1
 )
 
-set /p PRODUCT_ID=KREAM product ID: 
-set /p SIZE=Size (example 240): 
-set /p BID_PRICE=Test bid price in won (example 131000): 
+set /p MAX_PRODUCTS=How many ranking products should be checked? (example 20): 
+if "%MAX_PRODUCTS%"=="" set MAX_PRODUCTS=20
 
 call .venv\Scripts\activate.bat
-python main.py --product-id %PRODUCT_ID% --size %SIZE% --bid-price %BID_PRICE%
+python main.py --max-products %MAX_PRODUCTS%
 
 echo.
 pause
