@@ -5,3 +5,4 @@ __pycache__/
 auth.json
 playwright/.auth/
 logs/
+test_results/
