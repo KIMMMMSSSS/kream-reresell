@@ -1,16 +1,22 @@
 @echo off
-setlocal
+setlocal EnableExtensions
 cd /d "%~dp0"
 
 echo Working folder: %CD%
 echo.
 
 if not exist ".venv\Scripts\python.exe" (
-  echo [ERROR] Setup has not completed in this folder.
-  echo Run setup_windows.bat first and make sure it says SETUP COMPLETE.
+  echo First run detected. Starting setup automatically...
   echo.
-  pause
-  exit /b 1
+  call setup_windows.bat
+  if errorlevel 1 (
+    echo.
+    echo [ERROR] Setup did not complete.
+    echo Take a photo of this window and send it.
+    echo.
+    pause
+    exit /b 1
+  )
 )
 
 set /p MAX_PRODUCTS=How many ranking products should be checked? (default 100): 
