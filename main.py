@@ -9,7 +9,7 @@ from kream_bot.scanner import scan_product_sizes
 
 def parse_args():
     parser = argparse.ArgumentParser(description="KREAM ranking scanner - DRY RUN")
-    parser.add_argument("--max-products", type=int, default=20)
+    parser.add_argument("--max-products", type=int, default=100)
     return parser.parse_args()
 
 
