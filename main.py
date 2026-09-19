@@ -3,33 +3,45 @@ from __future__ import annotations
 import argparse
 
 from kream_bot.browser import close_browser, open_browser, save_login
-from kream_bot.flow import continue_to_buy_bid, continue_to_storage, fill_bid_form, goto_product, open_buy_sheet, choose_size_by_text
+from kream_bot.ranking import collect_product_urls, open_ranking
+from kream_bot.scanner import scan_product_sizes
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="KREAM 구매입찰 보조 자동화")
-    p.add_argument("--product-id", required=True, help="KREAM 상품 ID")
-    p.add_argument("--size", required=True, help="사이즈, 예: 240")
-    p.add_argument("--bid-price", type=int, required=True, help="테스트용 구매입찰 희망가")
-    return p.parse_args()
+    parser = argparse.ArgumentParser(description="KREAM ranking scanner - DRY RUN")
+    parser.add_argument("--max-products", type=int, default=20)
+    return parser.parse_args()
 
 
 def main():
     args = parse_args()
     pw, browser, context, page = open_browser(headless=False)
+
     try:
-        goto_product(page, args.product_id)
-        input("KREAM 로그인 상태를 확인하세요. 준비되면 Enter: ")
+        open_ranking(page)
+
+        print("KREAM ranking page opened.")
+        print("Log in if needed, then choose the category you want in the browser.")
+        input("When the category page is ready, press Enter here: ")
+
         save_login(context)
+        product_urls = collect_product_urls(page, max_products=args.max_products)
 
-        open_buy_sheet(page)
-        choose_size_by_text(page, args.size)
-        continue_to_buy_bid(page)
-        fill_bid_form(page, args.bid_price)
-        continue_to_storage(page)
+        print(f"Found {len(product_urls)} product pages.")
+        print("DRY RUN: this version only visits products and reads sizes.")
 
-        print("DRY RUN 완료: 최종 제출은 누르지 않았습니다.")
-        input("브라우저를 확인한 뒤 Enter를 누르면 종료합니다: ")
+        for index, product_url in enumerate(product_urls, start=1):
+            try:
+                result = scan_product_sizes(page, product_url)
+                sizes = ", ".join(result.sizes) if result.sizes else "(not detected)"
+                print(f"[{index}/{len(product_urls)}] {product_url}")
+                print(f"  sizes: {sizes}")
+            except Exception as exc:
+                print(f"[{index}/{len(product_urls)}] {product_url}")
+                print(f"  error: {exc}")
+
+        print("DRY RUN finished. No purchase or bid was submitted.")
+        input("Press Enter to close the browser: ")
     finally:
         close_browser(pw, browser)
 
